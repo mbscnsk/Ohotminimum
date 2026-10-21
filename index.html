@@ -735,10 +735,11 @@ function syncIncoming(){
 const FB_CONFIG={"apiKey":"AIzaSyCxUIqL9nATjRhfQ3Z87EZ0ZF2rwuWEAHY","authDomain":"ohotminimum-7c6fe.firebaseapp.com","projectId":"ohotminimum-7c6fe","storageBucket":"ohotminimum-7c6fe.firebasestorage.app","messagingSenderId":"410439334342","appId":"1:410439334342:web:d5978287a465f250ee9ac7"};
 const ADMINS=["mobsce@gmail.com"];
 let USER=null,DB=null,PUSH_T=null,CLOUD_STATE="off",CUR="home";
-const cloudOn=()=>!!(FB_CONFIG&&typeof firebase!=="undefined");
+const CLOUD_HOSTS=["mbscnsk.github.io","localhost"];
+const cloudOn=()=>!!(FB_CONFIG&&typeof firebase!=="undefined"&&CLOUD_HOSTS.includes(location.hostname));
 const isAdmin=()=>!!(USER&&USER.email&&ADMINS.includes(USER.email.toLowerCase()));
 function accountBar(){
-  if(!cloudOn())return `<p class="sub">Прогресс сохраняется на этом устройстве.</p>`;
+  if(!cloudOn())return `<p class="sub">Прогресс сохраняется на этом устройстве.${FB_CONFIG&&!CLOUD_HOSTS.includes(location.hostname)?` Вход через Google работает на сайте <b>mbscnsk.github.io/Ohotminimum</b>.`:""}</p>`;
   if(!USER)return `<div class="acct"><div><b>Войди через Google</b>, чтобы прогресс сохранялся и был виден на всех твоих устройствах.<div class="muted">Результаты увидит организатор тренажёра.</div></div><button class="btn" data-login>Войти через Google</button></div>`;
   const st={off:"",sync:"синхронизация…",ok:"сохранено в облаке",err:"нет связи, сохранится позже"}[CLOUD_STATE]||"";
   return `<div class="acct">${USER.photoURL?`<img src="${esc(USER.photoURL)}" alt="" referrerpolicy="no-referrer">`:""}<div><b>${esc(USER.displayName||USER.email)}</b><div class="muted">${st}</div></div><span class="sp"></span>${isAdmin()?`<button class="btn blaze" data-go="admin">Статистика</button>`:""}<button class="iconbtn" data-logout>Выйти</button></div>`;
