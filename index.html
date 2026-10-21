@@ -480,7 +480,7 @@ function home(){
     <div><div class="label">Выучено</div><div class="n">${a.l} / ${a.n}</div></div>
     <div><div class="label">Пройдено</div><div class="n">${a.s}</div></div>
     <div><div class="label">В ошибках</div><div class="n" style="color:var(--bad)">${a.m}</div></div></div>
-    <p>«Выучено» — ответил верно 3 раза подряд. Ошибка сбрасывает счётчик.</p></div></div>
+    <p>«Выучено» — ответил верно 3 раза подряд. Ошибка сбрасывает счётчик.</p><button class="iconbtn" data-go="sync" style="margin-top:8px">Перенести прогресс на другое устройство →</button></div></div>
   <div class="modes">
     <button class="mode primary" data-go="smart">${ICON.bolt}<span><b>Умная тренировка</b><small>15 вопросов: сначала новые и слабые</small></span></button>
     <button class="mode" data-go="exam">${ICON.exam}<span><b>Экзамен</b><small>Случайные вопросы, разбор в конце</small></span></button>
@@ -672,7 +672,40 @@ function settings(){
   app.innerHTML=top("Настройки",1)+`<div class="card">
   <div class="setrow"><div><b>Перемешивать варианты</b><div class="sub" style="margin:0">Учишь смысл ответа, а не букву</div></div><button class="toggle ${S.opt.shuffle?"on":""}" id="tg-sh" aria-pressed="${S.opt.shuffle}" aria-label="Перемешивать варианты"></button></div>
   <div class="setrow"><div><b>Сбросить прогресс</b><div class="sub" style="margin:0">Обнулит статистику и ошибки на этом устройстве</div></div><button class="btn ghost danger" id="rst">${resetArm?"Точно сбросить?":"Сбросить"}</button></div>
-  </div><p class="sub" style="margin-top:12px">Прогресс хранится в браузере этого устройства. На iPhone, iPad и ПК он свой. В режиме «Частный доступ» Safari прогресс не сохранится.</p>`;
+  </div><div class="actions"><button class="btn" data-go="sync">Перенести прогресс на другое устройство</button></div><p class="sub" style="margin-top:12px">Прогресс хранится в браузере этого устройства. На iPhone, iPad и ПК он свой, переносится по ссылке. В режиме «Частный доступ» Safari прогресс не сохранится.</p>`;
+}
+
+
+/* ---------- перенос прогресса ---------- */
+const ORD=QS.map(q=>q.id);
+const SITE="https://mbscnsk.github.io/Ohotminimum/";
+function exportCode(){let s="";ORD.forEach(id=>{const x=S.st[id];if(!x||!x.s){s+="---";return}s+=(x.b*2+(x.m?1:0)).toString(36)+Math.min(35,x.w).toString(36)+Math.min(35,x.s).toString(36)});return "1"+s.replace(/(---)+$/,"")}
+function parseCode(c){c=(c||"").trim();if(c.includes("sync="))c=c.split("sync=")[1];try{c=decodeURIComponent(c)}catch(e){}c=c.trim();if(c[0]!=="1")return null;c=c.slice(1);if(c.length%3)return null;const out={};for(let i=0;i*3<c.length;i++){const ch=c.substr(i*3,3);if(ch==="---")continue;const v=parseInt(ch[0],36),w=parseInt(ch[1],36),s=parseInt(ch[2],36);if([v,w,s].some(isNaN)||!ORD[i])return null;out[ORD[i]]={b:Math.min(5,v>>1),m:v&1,w,s}}return out}
+function mergeCode(data){let n=0;Object.keys(data).forEach(id=>{const cur=S.st[id],x=data[id];if(cur&&cur.s>=x.s)return;S.st[id]=Object.assign({t:Date.now()},x);n++});save();return n}
+function syncLink(){return SITE+"#sync="+exportCode()}
+let SYNCMSG="";
+function syncView(){
+  const a=stats(QS);
+  app.innerHTML=top("Перенос прогресса",1)+`<div class="card"><h2 style="font-size:20px;margin-bottom:6px">С этого устройства</h2>
+  <p class="sub" style="margin:0 0 10px">Здесь пройдено ${a.s} вопр., выучено ${a.l}. Скопируй ссылку, отправь себе в Telegram или на почту и открой её на другом устройстве.</p>
+  <textarea id="sl" class="search" rows="3" readonly style="font-family:var(--f-mono);font-size:12px;resize:none">${esc(syncLink())}</textarea>
+  <div class="actions"><button class="btn blaze" id="cp">Скопировать ссылку</button></div></div>
+  <div class="card" style="margin-top:12px"><h2 style="font-size:20px;margin-bottom:6px">На это устройство</h2>
+  <p class="sub" style="margin:0 0 10px">Открой ссылку с другого устройства или вставь её сюда. Прогресс объединится: по каждому вопросу останется запись, где он пройден больше раз.</p>
+  <textarea id="si" class="search" rows="3" placeholder="Вставь ссылку или код" style="font-family:var(--f-mono);font-size:12px;resize:vertical"></textarea>
+  <div class="actions"><button class="btn" id="ld">Загрузить прогресс</button></div>
+  ${SYNCMSG?`<p class="docnote" style="margin-top:10px">${SYNCMSG}</p>`:""}</div>`;
+  SYNCMSG="";
+}
+function syncIncoming(){
+  const h=location.hash;if(!h.includes("sync="))return false;
+  const data=parseCode(h);
+  try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+  if(!data){SYNCMSG="Ссылка повреждена. Скопируй её заново целиком.";syncView();return true}
+  const n=Object.keys(data).length;
+  app.innerHTML=top("Перенос прогресса",1)+`<div class="card"><h2 style="font-size:20px">Загрузить прогресс с другого устройства?</h2><p>В ссылке ${n} пройденных вопросов. Они объединятся с тем, что уже есть на этом устройстве, ничего не потеряется.</p><div class="actions"><button class="btn blaze" id="inc">Загрузить</button><button class="btn ghost" data-go="home">Отмена</button></div></div>`;
+  document.getElementById("inc").onclick=()=>{const k=mergeCode(data);SYNCMSG=`Готово. Обновлено вопросов: ${k}.`;syncView()};
+  return true;
 }
 
 /* ---------- маршрутизация ---------- */
@@ -685,6 +718,7 @@ function go(v){SES=null;scrollTo(0,0);
   else if(v==="cheat")cheat();
   else if(v==="ref")ref();
   else if(v==="settings"){resetArm=false;settings()}
+  else if(v==="sync")syncView();
 }
 app.addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;
@@ -698,6 +732,8 @@ app.addEventListener("click",e=>{
   if(t.dataset.fl!==undefined){record(FL.list[FL.i].id,t.dataset.fl==="1");FL.i++;FL.open=false;if(FL.i>=FL.list.length){app.innerHTML=top("Карточки",1)+`<div class="card"><h2>Колода пройдена</h2><p>Отметки «Знал / Не вспомнил» учтены в общей статистике.</p><div class="actions"><button class="btn blaze" data-go="flash">Ещё 20 карточек</button><button class="btn ghost" data-go="home">На главную</button></div></div>`}else flashR();return}
   if(t.dataset.rt!==undefined){REF.t=t.dataset.rt;return ref()}
   if(t.hasAttribute("data-notes"))return start("notes",["91","99","104","117","118","118-2","257"].map(i=>BYID[i]),"Вопросы с опечатками");
+  if(t.id==="cp"){const ta=document.getElementById("sl");const done=()=>{t.textContent="Скопировано"};try{navigator.clipboard.writeText(ta.value).then(done,()=>{ta.select();done()})}catch(err){ta.select();document.execCommand&&document.execCommand("copy");done()}return}
+  if(t.id==="ld"){const data=parseCode(document.getElementById("si").value);if(!data){SYNCMSG="Не получилось прочитать. Вставь ссылку целиком, от https до конца.";return syncView()}const k=mergeCode(data);SYNCMSG=`Готово. Обновлено вопросов: ${k}.`;return syncView()}
   if(t.id==="tg-sh"){S.opt.shuffle=!S.opt.shuffle;save();return settings()}
   if(t.id==="rst"){if(!resetArm){resetArm=true;return settings()}S.st={};S.exams=[];save();resetArm=false;return go("home")}
 });
@@ -706,7 +742,7 @@ document.addEventListener("keydown",e=>{
   if(["1","2","3","4"].includes(e.key)&&SES.picked===null){const p=+e.key-1;if(p<SES.list[SES.i].o.length){e.preventDefault();pick(p)}}
   else if((e.key==="Enter"||e.key===" ")&&SES.picked!==null&&document.activeElement?.dataset?.next===undefined){e.preventDefault();next()}
 });
-home();
+if(!syncIncoming())home();
 })();
 </script>
 </body></html>
