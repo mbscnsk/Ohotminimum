@@ -172,9 +172,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .cap{margin:6px 0 0;color:var(--muted);font-size:13.5px}
 .pc{font-style:normal;float:right;font-family:var(--f-mono);font-size:12px;color:var(--muted)}.pc.full{color:var(--ok)}
 .ph{margin:-18px -18px 14px;height:200px;border-radius:var(--r) var(--r) 0 0;overflow:hidden;position:relative;background:linear-gradient(110deg,var(--moss-soft) 30%,var(--bg) 50%,var(--moss-soft) 70%);background-size:300% 100%;animation:shim 1.4s linear infinite}
-.ph img{width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block;opacity:0;transition:opacity .4s}
+.ph::before{content:"";position:absolute;inset:-20px;background:var(--img) center/cover;filter:blur(18px) brightness(.85);opacity:.9}
+.ph img{position:relative;width:100%;height:100%;object-fit:contain;display:block;opacity:0;transition:opacity .4s}
 .ph img.on{opacity:1}
-.ph figcaption{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:end;gap:8px;padding:28px 14px 9px;background:linear-gradient(transparent,rgba(10,20,12,.72));color:#fff;font-size:13px}
+.ph figcaption{z-index:1;position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:end;gap:8px;padding:28px 14px 9px;background:linear-gradient(transparent,rgba(10,20,12,.72));color:#fff;font-size:13px}
 .ph figcaption span{font-family:var(--f-display);font-size:18px;font-weight:700}
 .ph figcaption a{color:#fff;opacity:.85}
 @keyframes shim{to{background-position:-300% 0}}
@@ -191,7 +192,7 @@ mark{background:var(--blaze-soft);color:var(--blaze);border-radius:4px;padding:0
 .twins{display:grid;gap:10px}
 .qtext.tw{font-size:19px}
 .mini-cal{display:block;width:100%;max-width:300px;height:auto;margin-top:6px}
-.ph.big{height:260px}
+.ph.big{height:320px}
 .chk{display:grid;gap:0;padding:4px 16px}
 .ck{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
 .ck:last-child{border-bottom:0}
@@ -589,7 +590,7 @@ const TOP={
 const ORDER=["docs","transport","collective","special","ungulate","bear","fur","bird","methods","safety","general"];
 const QS=Q.map(r=>({id:String(r[0]),t:r[1],q:r[2],o:r[3],c:r[4],e:r[5],note:r[6]||""}));
 const BYID={};QS.forEach(x=>BYID[x.id]=x);
-const L=["А","Б","В","Г"];
+const L=["А","Б","В","Г","Д"];
 const KEY="ohotmin.v1";
 let S={st:{},opt:{shuffle:true},exams:[]};
 try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);S=Object.assign(S,p);S.opt=Object.assign({shuffle:true},p.opt||{})}}catch(e){}
@@ -686,7 +687,7 @@ function wiki(name){
    .catch(()=>{delete WIKI_P[name];return null});
 }
 function photoHTML(q){const n=speciesOf(q);if(!n)return"";return `<figure class="ph" data-sp="${esc(n)}"><img alt="${esc(n)}" decoding="async"><figcaption><span>${esc(n)}</span><a target="_blank" rel="noopener">Фото: Википедия</a></figcaption></figure>`}
-function fillPhotos(root){(root||document).querySelectorAll("figure.ph[data-sp]:not([data-done])").forEach(f=>{f.dataset.done=1;wiki(f.dataset.sp).then(v=>{if(!v){f.hidden=true;return}const im=f.querySelector("img");im.onload=()=>im.classList.add("on");im.onerror=()=>{f.hidden=true};im.src=v.img;f.querySelector("a").href=v.url})})}
+function fillPhotos(root){(root||document).querySelectorAll("figure.ph[data-sp]:not([data-done])").forEach(f=>{f.dataset.done=1;wiki(f.dataset.sp).then(v=>{if(!v){f.hidden=true;return}const im=f.querySelector("img");im.onload=()=>im.classList.add("on");im.onerror=()=>{f.hidden=true};im.src=v.img;f.style.setProperty("--img",`url("${v.img}")`);f.querySelector("a").href=v.url})})}
 function infoHTML(q){const n=speciesOf(q);return n?`<p class="wiki-ext" data-ext="${esc(n)}" hidden></p>`:""}
 function fillInfo(root){(root||document).querySelectorAll("[data-ext]").forEach(el=>{wiki(el.dataset.ext).then(v=>{if(v&&v.ext){el.innerHTML=`<b>${esc(v.title)}.</b> ${esc(v.ext)} <a href="${esc(v.url)}" target="_blank" rel="noopener">Википедия&nbsp;→</a>`;el.hidden=false}})})}
 function prefetchSpecies(list){list.slice(0,25).forEach(q=>{const n=speciesOf(q);if(n)wiki(n).then(v=>{if(v){const i=new Image();i.src=v.img}})})}
