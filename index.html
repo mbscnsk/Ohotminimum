@@ -497,7 +497,7 @@ function top(title,back){return `<div class="top">${back?`<button class="iconbtn
 /* ---------- главная ---------- */
 function home(){CUR="home";
   const a=stats(QS);
-  let h=top('Охот<b>минимум</b>')+`<p class="sub">Все 257 вопросов Минприроды (утв. 18.09.2025, № 21/12) с пояснениями.</p>${accountBar()}
+  let h=top('Охот<b>минимум</b>')+`<p class="sub">Все вопросы списка Минприроды (утв. 18.09.2025, № 21/12) с пояснениями: 257 номеров, номер 118 в списке повторяется дважды, поэтому вопросов 258.</p>${accountBar()}
   <div class="hero">${ring(a.l/a.n)}<div><div class="nums">
     <div><div class="label">Выучено</div><div class="n">${a.l} / ${a.n}</div></div>
     <div><div class="label">Пройдено</div><div class="n">${a.s}</div></div>
@@ -586,7 +586,7 @@ function result(){
 function examSetup(){
   app.innerHTML=top("Экзамен",1)+`<div class="card"><p>Вопросы случайные из всех тем. Правильность не показывается до конца — как на настоящей проверке. Цель — пройти несколько раз подряд без единой ошибки.</p>
   <div class="label" style="margin:14px 0 8px">Сколько вопросов</div><div class="seg">
-  ${[10,20,40,80].map(n=>`<button class="btn ${n===20?"blaze":"ghost"}" data-exam="${n}">${n}</button>`).join("")}<button class="btn ghost" data-exam="257">Все 257</button></div></div>`;
+  ${[10,20,40,80].map(n=>`<button class="btn ${n===20?"blaze":"ghost"}" data-exam="${n}">${n}</button>`).join("")}<button class="btn ghost" data-exam="258">Все 258</button></div></div>`;
 }
 
 /* ---------- карточки ---------- */
@@ -668,7 +668,7 @@ function cheat(){
    <li><b>Карточки вместо угадывания.</b> В карточках вариантов нет — нужно вспомнить ответ самому. Это сильнее закрепляет, чем узнавание среди трёх вариантов.</li>
    <li><b>Варианты перемешиваются.</b> Так ты учишь ответ, а не букву. Отключить можно в настройках.</li>
    <li><b>Читай вопрос до конца.</b> Ловушки: «только», «без ограничений», «не более» вместо «не менее», «общедоступные» вместо «закреплённые». Чаще всего верен самый полный вариант с «за исключением…» — но не всегда (см. вопросы 232 и 234).</li>
-   <li><b>Финиш.</b> Перед проверкой пройди «Экзамен» на 40 вопросов три раза подряд без ошибок, и ещё раз «Все 257».</li>
+   <li><b>Финиш.</b> Перед проверкой пройди «Экзамен» на 40 вопросов три раза подряд без ошибок, и ещё раз «Все 258».</li>
   </ol>
   <div class="sec-h"><h2>Опечатки в официальном списке</h2></div>
   <div class="card"><p style="margin:0 0 8px">В вопросах 91, 99, 104, 117, 257 буква в строке «Правильный ответ» не совпадает с выделенным вариантом. Тренажёр опирается на текст ответа, а при ответе показывает пометку. Вопрос 118 в документе встречается дважды.</p><div class="actions"><button class="btn ghost" data-notes>Тренировать эти вопросы</button></div></div>`;
@@ -734,16 +734,17 @@ function syncIncoming(){
 /* ---------- облако: вход через Google, синхронизация, статистика ---------- */
 const FB_CONFIG={"apiKey":"AIzaSyCxUIqL9nATjRhfQ3Z87EZ0ZF2rwuWEAHY","authDomain":"ohotminimum-7c6fe.firebaseapp.com","projectId":"ohotminimum-7c6fe","storageBucket":"ohotminimum-7c6fe.firebasestorage.app","messagingSenderId":"410439334342","appId":"1:410439334342:web:d5978287a465f250ee9ac7"};
 const ADMINS=["mobsce@gmail.com"];
-let USER=null,DB=null,PUSH_T=null,CLOUD_STATE="off",CUR="home";
+let USER=null,DB=null,PUSH_T=null,CLOUD_STATE="off",CLOUD_ERR="",CUR="home";
 const CLOUD_HOSTS=["mbscnsk.github.io","localhost"];
 const cloudOn=()=>!!(FB_CONFIG&&typeof firebase!=="undefined"&&CLOUD_HOSTS.includes(location.hostname));
 const isAdmin=()=>!!(USER&&USER.email&&ADMINS.includes(USER.email.toLowerCase()));
 function accountBar(){
   if(!cloudOn())return `<p class="sub">Прогресс сохраняется на этом устройстве.${FB_CONFIG&&!CLOUD_HOSTS.includes(location.hostname)?` Вход через Google работает на сайте <b>mbscnsk.github.io/Ohotminimum</b>.`:""}</p>`;
   if(!USER)return `<div class="acct"><div><b>Войди через Google</b>, чтобы прогресс сохранялся и был виден на всех твоих устройствах.<div class="muted">Результаты увидит организатор тренажёра.</div></div><button class="btn" data-login>Войти через Google</button></div>`;
-  const st={off:"",sync:"синхронизация…",ok:"сохранено в облаке",err:"нет связи, сохранится позже"}[CLOUD_STATE]||"";
+  const st=cloudMsg();
   return `<div class="acct">${USER.photoURL?`<img src="${esc(USER.photoURL)}" alt="" referrerpolicy="no-referrer">`:""}<div><b>${esc(USER.displayName||USER.email)}</b><div class="muted">${st}</div></div><span class="sp"></span>${isAdmin()?`<button class="btn blaze" data-go="admin">Статистика</button>`:""}<button class="iconbtn" data-logout>Выйти</button></div>`;
 }
+function cloudMsg(){if(CLOUD_STATE==="ok")return"сохранено в облаке";if(CLOUD_STATE==="sync")return"синхронизация…";if(CLOUD_STATE==="err")return CLOUD_ERR==="permission-denied"?"облако не принимает данные: проверь правила Firestore":CLOUD_ERR?"не сохранилось ("+CLOUD_ERR+"), повторю позже":"нет связи, сохранится позже";return""}
 function rerender(){if(SES||FL&&CUR==="flash")return;if(CUR==="home")home();else if(CUR==="settings")settings();}
 function mergeRemote(r){
   if(!r)return;
@@ -754,7 +755,7 @@ function mergeRemote(r){
 }
 async function pull(){
   if(!USER||!DB)return;CLOUD_STATE="sync";
-  try{const d=await DB.collection("users").doc(USER.uid).get();if(d.exists)mergeRemote(d.data());await push(true)}catch(e){CLOUD_STATE="err";console.warn(e)}
+  try{const d=await DB.collection("users").doc(USER.uid).get();if(d.exists)mergeRemote(d.data());await push(true)}catch(e){CLOUD_STATE="err";CLOUD_ERR=e.code||e.message||"";console.warn(e)}
 }
 function schedulePush(){if(!USER||!DB)return;clearTimeout(PUSH_T);PUSH_T=setTimeout(()=>push(),2500)}
 async function push(){
@@ -767,9 +768,9 @@ async function push(){
       learned:a.l,seen:a.s,mistakes:a.m,
       updated:firebase.firestore.FieldValue.serverTimestamp()
     });
-    CLOUD_STATE="ok";
-  }catch(e){CLOUD_STATE="err";console.warn(e)}
-  const m=document.querySelector(".acct .muted");if(m&&USER)m.textContent=CLOUD_STATE==="ok"?"сохранено в облаке":"нет связи, сохранится позже";
+    CLOUD_STATE="ok";CLOUD_ERR="";
+  }catch(e){CLOUD_STATE="err";CLOUD_ERR=e.code||e.message||"";console.warn(e)}
+  const m=document.querySelector(".acct .muted");if(m&&USER)m.textContent=cloudMsg();
 }
 function cloudInit(){
   if(!cloudOn())return;
@@ -819,7 +820,7 @@ function adminRender(){
   U.forEach(u=>{const ex=u.exams||[];const le=ex[ex.length-1];const best=ex.filter(e=>e.n>=20).reduce((m,e)=>Math.max(m,e.ok/e.n),0);
     const l=u.learned||0;
     h+=`<tr data-user="${esc(u.id)}"><td><b>${esc(u.name||"Без имени")}</b><div class="muted">${esc(u.email||"")}</div></td>
-      <td><div class="mini"><i style="width:${l/257*100}%"></i></div><span class="num">${l} / 257</span></td>
+      <td><div class="mini"><i style="width:${l/QS.length*100}%"></i></div><span class="num">${l} / ${QS.length}</span></td>
       <td class="num">${u.mistakes||0}</td><td class="num">${sumDays(u.act,7)}</td><td>${spark(u.act)}</td>
       <td class="num">${ex.length?`${ex.length} · посл. ${le.ok}/${le.n}${best?` · лучш. ${Math.round(best*100)}%`:""}`:"—"}</td>
       <td class="num">${fmtAgo(u.upd)}</td></tr>`});
