@@ -1,0 +1,16 @@
+{
+  "name": "Охотминимум — тренажёр",
+  "short_name": "Охотминимум",
+  "description": "Тренажёр по вопросам проверки знаний охотминимума Минприроды России",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F2F4EE",
+  "theme_color": "#3D6A4C",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

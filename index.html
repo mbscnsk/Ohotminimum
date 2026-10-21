@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Охотминимум</title>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" href="favicon.png"><meta name="theme-color" content="#3D6A4C"><meta name="apple-mobile-web-app-title" content="Охотминимум"><meta name="apple-mobile-web-app-status-bar-style" content="default"><title>Охотминимум</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -8,7 +8,7 @@
 /* Полевой справочник егеря: бумага с лёгкой зеленью, мох, сигнальный оранжевый жилета */
 :root{
   --bg:#F2F4EE; --paper:#FFFFFF; --ink:#1D2820; --muted:#5E6B61; --line:#D8DED3;
-  --moss:#3D6A4C; --moss-soft:#E3EDE4; --blaze:#E0601A; --blaze-soft:#FCE8DB;
+  --moss:#3D6A4C; --moss-soft:#E3EDE4; --moss-mid:#9DBBA6; --blaze:#E0601A; --blaze-soft:#FCE8DB;
   --ok:#2E7D4A; --ok-soft:#DDF0E2; --bad:#B8322A; --bad-soft:#F8E0DD; --warn:#9A6B00; --warn-soft:#FBF0D2;
   --f-display:"Alegreya",Georgia,"Times New Roman",serif;
   --f-body:"Alegreya Sans","Segoe UI",system-ui,-apple-system,sans-serif;
@@ -17,11 +17,11 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#141A16; --paper:#1C241F; --ink:#E6ECE5; --muted:#9AA79D; --line:#2E3A32;
-  --moss:#7DB38E; --moss-soft:#24352A; --blaze:#F58A4B; --blaze-soft:#3A2618;
+  --moss:#7DB38E; --moss-soft:#24352A; --moss-mid:#4C6E57; --blaze:#F58A4B; --blaze-soft:#3A2618;
   --ok:#6CC58A; --ok-soft:#1E3526; --bad:#F07A6E; --bad-soft:#3D2220; --warn:#E3B54A; --warn-soft:#3A2F14; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141A16; --paper:#1C241F; --ink:#E6ECE5; --muted:#9AA79D; --line:#2E3A32;
-  --moss:#7DB38E; --moss-soft:#24352A; --blaze:#F58A4B; --blaze-soft:#3A2618;
+  --moss:#7DB38E; --moss-soft:#24352A; --moss-mid:#4C6E57; --blaze:#F58A4B; --blaze-soft:#3A2618;
   --ok:#6CC58A; --ok-soft:#1E3526; --bad:#F07A6E; --bad-soft:#3D2220; --warn:#E3B54A; --warn-soft:#3A2F14; color-scheme:dark}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -159,6 +159,32 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .mini{height:6px;width:90px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:4px}.mini i{display:block;height:100%;background:var(--ok)}
 .spk{width:70px;height:16px;display:block}
 @media (max-width:560px){.kpis{grid-template-columns:1fr}}
+.dash{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.dash .card{padding:14px 16px}
+.dash-h{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.dash-h .n{font-family:var(--f-display);font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.dash-h .n small{font-size:15px;color:var(--muted);font-weight:500}
+.goal{flex:1;min-width:80px;height:10px;border-radius:5px;background:var(--line);overflow:hidden}.goal i{display:block;height:100%;background:var(--blaze);border-radius:5px}
+.streak{display:flex;align-items:center;gap:4px;color:var(--blaze);font-size:14px}.streak b{font-size:18px;color:var(--ink)}
+.chart{display:block;width:100%;height:auto;margin-top:8px}
+.cap{margin:6px 0 0;color:var(--muted);font-size:13.5px}
+.pc{font-style:normal;float:right;font-family:var(--f-mono);font-size:12px;color:var(--muted)}.pc.full{color:var(--ok)}
+.ph{margin:-18px -18px 14px;height:200px;border-radius:var(--r) var(--r) 0 0;overflow:hidden;position:relative;background:linear-gradient(110deg,var(--moss-soft) 30%,var(--bg) 50%,var(--moss-soft) 70%);background-size:300% 100%;animation:shim 1.4s linear infinite}
+.ph img{width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block;opacity:0;transition:opacity .4s}
+.ph img.on{opacity:1}
+.ph figcaption{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:end;gap:8px;padding:28px 14px 9px;background:linear-gradient(transparent,rgba(10,20,12,.72));color:#fff;font-size:13px}
+.ph figcaption span{font-family:var(--f-display);font-size:18px;font-weight:700}
+.ph figcaption a{color:#fff;opacity:.85}
+@keyframes shim{to{background-position:-300% 0}}
+.flash .ph{margin-bottom:14px}
+.wiki-ext{margin:0;font-size:15px;background:var(--paper);border-radius:10px;padding:10px 12px}
+.wiki-ext a{color:var(--moss)}
+.qmeta .sp{flex:1}
+.fav{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font-size:14px;color:var(--muted)}
+.fav svg path{fill:transparent}
+.fav.on{border-color:var(--blaze);color:var(--blaze);background:var(--blaze-soft)}.fav.on svg path{fill:currentColor}
+.star-ic{width:30px;height:30px;color:var(--blaze);display:grid;place-items:center;flex:none}.star-ic svg{width:28px;height:28px}.star-ic svg path{fill:var(--blaze-soft)}
+@media (max-width:560px){.dash{grid-template-columns:1fr}.ph{height:170px}.fav span{display:none}.fav{padding:6px 8px}}
 @media (max-width:560px){
   body{font-size:16.5px}
   .modes,.topics,.memo{grid-template-columns:1fr}
@@ -496,13 +522,21 @@ function top(title,back){return `<div class="top">${back?`<button class="iconbtn
 
 /* ---------- главная ---------- */
 function home(){CUR="home";
-  const a=stats(QS);
+  const a=stats(QS);const today=actOn(0);const sk=streak();const nf=Object.keys(S.fav||{}).length;
   let h=top('Охот<b>минимум</b>')+`<p class="sub">Все вопросы списка Минприроды (утв. 18.09.2025, № 21/12) с пояснениями: 257 номеров, номер 118 в списке повторяется дважды, поэтому вопросов 258.</p>${accountBar()}
   <div class="hero">${ring(a.l/a.n)}<div><div class="nums">
     <div><div class="label">Выучено</div><div class="n">${a.l} / ${a.n}</div></div>
     <div><div class="label">Пройдено</div><div class="n">${a.s}</div></div>
     <div><div class="label">В ошибках</div><div class="n" style="color:var(--bad)">${a.m}</div></div></div>
-    <p>«Выучено» — ответил верно 3 раза подряд. Ошибка сбрасывает счётчик.</p><button class="iconbtn" data-go="sync" style="margin-top:8px">Перенести прогресс на другое устройство →</button></div></div>
+    <p>${readiness()}</p>${USER?"":`<button class="iconbtn" data-go="sync" style="margin-top:8px">Перенести прогресс на другое устройство →</button>`}</div></div>
+  <div class="dash">
+    <div class="card"><div class="dash-h"><div><div class="label">Сегодня</div><div class="n">${today} <small>из ${GOAL}</small></div></div>
+      <div class="goal"><i style="width:${Math.min(100,today/GOAL*100)}%"></i></div>
+      <div class="streak" title="Дни подряд с занятиями"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 2.5c.6 3-1.8 4.6-1.8 7.3 0 1.2.8 2.2 1.8 2.2 1.3 0 2-1.1 1.8-2.6 2.6 1.6 4.2 4.1 4.2 6.7A6 6 0 0 1 6 16.1c0-4.4 4.5-6.8 6-13.6z" fill="currentColor"/></svg><b>${sk}</b> ${plural(sk,"день","дня","дней")} подряд</div></div>
+      ${activityChart(14,i=>actOn(i),GOAL,"Ответы по дням за 2 недели")}
+      <p class="cap">${today>=GOAL?"Цель на сегодня выполнена.":`До цели на сегодня ${GOAL-today} ${plural(GOAL-today,"ответ","ответа","ответов")}: это пара умных тренировок.`}</p></div>
+    ${S.exams.length>=2?`<div class="card"><div class="label">Экзамены</div>${examChart(S.exams)}<p class="cap">Пунктир — 80%. Зелёная точка — экзамен без ошибок.</p></div>`:`<div class="card"><div class="label">Экзамены</div><p class="cap" style="margin-top:8px">График результатов появится после двух экзаменов. Цель — несколько раз подряд без единой ошибки.</p><div class="actions"><button class="btn ghost" data-go="exam">Пройти экзамен</button></div></div>`}
+  </div>
   <div class="modes">
     <button class="mode primary" data-go="smart">${ICON.bolt}<span><b>Умная тренировка</b><small>15 вопросов: сначала новые и слабые</small></span></button>
     <button class="mode" data-go="exam">${ICON.exam}<span><b>Экзамен</b><small>Случайные вопросы, разбор в конце</small></span></button>
@@ -510,13 +544,101 @@ function home(){CUR="home";
     <button class="mode" data-go="flash">${ICON.flip}<span><b>Карточки</b><small>Вспомни ответ сам, потом проверь</small></span></button>
     <button class="mode" data-go="cheat">${ICON.cal}<span><b>Шпаргалка и как учить</b><small>Календарь сроков, приёмы запоминания</small></span></button>
     <button class="mode" data-go="ref">${ICON.list}<span><b>Все вопросы с ответами</b><small>Поиск по тексту и темам</small></span></button>
+    <button class="mode" data-go="favs"><span class="star-ic">${STAR}</span><span><b>Отмеченные</b><small>${nf?nf+" "+plural(nf,"вопрос","вопроса","вопросов")+" со звёздочкой":"Отмечай звёздочкой трудные вопросы"}</small></span></button>
   </div>
   <div class="sec-h"><h2>Темы</h2><span class="label">нажми, чтобы тренировать</span></div><div class="topics">`;
   ORDER.forEach(k=>{const list=QS.filter(q=>q.t===k);const s=stats(list);
-    h+=`<button class="topic" data-topic="${k}"><span class="ic">${ICON[TOP[k].i]}</span><span><b>${TOP[k].n}</b><small>${s.l} из ${s.n} выучено</small><span class="bar"><i class="g" style="width:${s.l/s.n*100}%"></i><i class="y" style="width:${(s.s-s.l)/s.n*100}%"></i></span></span></button>`});
+    const pc=Math.round(s.l/s.n*100);
+    h+=`<button class="topic" data-topic="${k}"><span class="ic">${ICON[TOP[k].i]}</span><span><b>${TOP[k].n}</b><small>${s.l} из ${s.n} выучено<em class="pc ${pc===100?"full":""}">${pc}%</em></small><span class="bar"><i class="g" style="width:${s.l/s.n*100}%"></i><i class="y" style="width:${(s.s-s.l)/s.n*100}%"></i></span></span></button>`});
   h+=`</div>`;
-  if(S.exams.length){h+=`<div class="sec-h"><h2>Последние экзамены</h2></div><div class="card" style="display:flex;gap:16px;flex-wrap:wrap">`+S.exams.slice(-8).reverse().map(e=>`<div><div class="n" style="font-family:var(--f-display);font-size:22px;font-weight:700;color:${e.ok===e.n?'var(--ok)':'var(--ink)'}">${e.ok}/${e.n}</div><div class="label">${new Date(e.d).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}</div></div>`).join("")+`</div>`}
+  if(false){h+=`<div class="sec-h"><h2>Последние экзамены</h2></div><div class="card" style="display:flex;gap:16px;flex-wrap:wrap">`+S.exams.slice(-8).reverse().map(e=>`<div><div class="n" style="font-family:var(--f-display);font-size:22px;font-weight:700;color:${e.ok===e.n?'var(--ok)':'var(--ink)'}">${e.ok}/${e.n}</div><div class="label">${new Date(e.d).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}</div></div>`).join("")+`</div>`}
+  h+=`<div class="sec-h"><h2>Легенда</h2></div><div class="legend"><span><i style="background:var(--ok)"></i>выучено (3 верных подряд)</span><span><i style="background:var(--warn)"></i>начато</span><span><i style="background:var(--line)"></i>не открывал</span></div>`;
   app.innerHTML=h;
+}
+
+
+/* ---------- звери и птицы: фото и справка из Википедии ---------- */
+const W=st=>new RegExp("(^|[^а-яё])"+st,"i");
+const SPECIES=[
+ [W("гималайск"),"Гималайский медведь"],[W("медвед"),"Бурый медведь"],[W("кабарг"),"Кабарга"],[W("кабан"),"Кабан"],
+ [/косул\S* европейск|европейск\S* косул/i,"Европейская косуля"],[/косул\S* сибирск|сибирск\S* косул/i,"Сибирская косуля"],[W("косул"),"Европейская косуля"],
+ [W("пятнист"),"Пятнистый олень"],[/северн\S* олен/i,"Северный олень"],[W("благородн"),"Благородный олень"],[W("лос(ь|я|ю|ем|е|ей|ям|ят|ях)(?![а-яё])"),"Лось"],
+ [W("овцебык"),"Овцебык"],[W("серн(а|у|ы|е|ой)(?![а-яё])"),"Серна"],[/горн\S* козл/i,"Сибирский горный козёл"],[W("тур(ов|ы|ам|а)?(?![а-яё])"),"Западнокавказский тур"],
+ [/снежн\S* баран/i,"Снежный баран"],[W("лан(ь|и|ью)(?![а-яё])"),"Лань"],[W("муфлон"),"Муфлон"],[W("зубр"),"Зубр"],
+ [W("волк"),"Волк"],[W("шакал"),"Обыкновенный шакал"],[W("енотовидн"),"Енотовидная собака"],[W("корсак"),"Корсак"],[W("лисиц"),"Обыкновенная лисица"],[W("(песц|песец)"),"Песец"],
+ [W("(заяц|зайц|беляк|русак)"),"Заяц-беляк"],[W("кролик"),"Европейский кролик"],[W("ондатр"),"Ондатра"],[W("бобр"),"Обыкновенный бобр"],[W("выдр"),"Выдра"],
+ [W("(белк|белок)"),"Обыкновенная белка"],[W("собол"),"Соболь"],[W("барсук"),"Барсук"],[W("бурундук"),"Азиатский бурундук"],[W("песчаник"),"Жёлтый суслик"],
+ [W("тарбаган"),"Монгольский сурок"],[W("(сурк|сурок)"),"Байбак"],[W("крот"),"Обыкновенный крот"],[/водян\S* полев/i,"Водяная полёвка"],[W("суслик"),"Крапчатый суслик"],
+ [W("турпан"),"Турпан"],[W("вальдшнеп"),"Вальдшнеп"],[W("рябчик"),"Рябчик"],[W("(кеклик|улар)"),"Кеклик"],[/тундрян|бел\S* куропат/i,"Белая куропатка"],
+ [/сер\S* куропат/i,"Серая куропатка"],[W("перепел"),"Перепел"],[W("глухар"),"Глухарь"],[W("тетерев"),"Тетерев"],[W("ворон"),"Серая ворона"],[W("лысух"),"Лысуха"],
+ [/серого гуся|серый гусь|гус(ей|я|и|ь)(?![а-яё])/i,"Серый гусь"],[W("(селезн|утк|уток)"),"Кряква"],[/болотно-лугов|бекас|дупел/i,"Бекас"],[W("водоплавающ"),"Кряква"],
+ [W("норк"),"Американская норка"],[/ловч\S* птиц/i,"Балобан"],[/легав|подружейн|охотничьих пород/i,"Курцхаар"],[W("пернат"),"Тетерев"],[W("копытн"),"Благородный олень"],[W("пушн"),"Соболь"]
+];
+const SPC={};
+function speciesOf(q){if(q.id in SPC)return SPC[q.id];for(const [re,name] of SPECIES)if(re.test(q.q))return SPC[q.id]=name;return SPC[q.id]=null}
+const WIKI_KEY="ohotmin.wiki.v1";let WIKI={};try{WIKI=JSON.parse(localStorage.getItem(WIKI_KEY)||"{}")}catch(e){}
+const WIKI_P={};
+function wikiUrl(extra){return "https://ru.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages%7Cextracts%7Cinfo&inprop=url&piprop=thumbnail&pithumbsize=800&exintro=1&explaintext=1&exsentences=2"+extra}
+function pickPage(j){const ps=j&&j.query&&j.query.pages;if(!ps)return null;const p=Object.values(ps).sort((a,b)=>(a.index||0)-(b.index||0)).find(x=>x.thumbnail);return p?{img:p.thumbnail.source,url:p.fullurl,title:p.title,ext:(p.extract||"").replace(/\s*\([^()]*\)/g,"").replace(/\s{2,}/g," ").trim()}:null}
+function wiki(name){
+  if(typeof fetch!=="function")return Promise.resolve(null);
+  if(WIKI[name]!==undefined)return Promise.resolve(WIKI[name]);
+  if(WIKI_P[name])return WIKI_P[name];
+  return WIKI_P[name]=fetch(wikiUrl("&titles="+encodeURIComponent(name))).then(r=>r.json()).then(j=>pickPage(j)||fetch(wikiUrl("&generator=search&gsrlimit=1&gsrsearch="+encodeURIComponent(name))).then(r=>r.json()).then(pickPage))
+   .then(v=>{WIKI[name]=v||null;try{localStorage.setItem(WIKI_KEY,JSON.stringify(WIKI))}catch(e){}return WIKI[name]})
+   .catch(()=>{delete WIKI_P[name];return null});
+}
+function photoHTML(q){const n=speciesOf(q);if(!n)return"";return `<figure class="ph" data-sp="${esc(n)}"><img alt="${esc(n)}" decoding="async"><figcaption><span>${esc(n)}</span><a target="_blank" rel="noopener">Фото: Википедия</a></figcaption></figure>`}
+function fillPhotos(root){(root||document).querySelectorAll("figure.ph[data-sp]:not([data-done])").forEach(f=>{f.dataset.done=1;wiki(f.dataset.sp).then(v=>{if(!v){f.hidden=true;return}const im=f.querySelector("img");im.onload=()=>im.classList.add("on");im.onerror=()=>{f.hidden=true};im.src=v.img;f.querySelector("a").href=v.url})})}
+function infoHTML(q){const n=speciesOf(q);return n?`<p class="wiki-ext" data-ext="${esc(n)}" hidden></p>`:""}
+function fillInfo(root){(root||document).querySelectorAll("[data-ext]").forEach(el=>{wiki(el.dataset.ext).then(v=>{if(v&&v.ext){el.innerHTML=`<b>${esc(v.title)}.</b> ${esc(v.ext)} <a href="${esc(v.url)}" target="_blank" rel="noopener">Википедия&nbsp;→</a>`;el.hidden=false}})})}
+function prefetchSpecies(list){list.slice(0,25).forEach(q=>{const n=speciesOf(q);if(n)wiki(n).then(v=>{if(v){const i=new Image();i.src=v.img}})})}
+
+/* ---------- отмеченные вопросы ---------- */
+function isFav(id){return !!(S.fav&&S.fav[id])}
+function toggleFav(id){S.fav=S.fav||{};if(S.fav[id])delete S.fav[id];else S.fav[id]=1;save();schedulePush()}
+const STAR='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3.2l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.5 6.6 19.4l1.2-5.9L3.4 9.4l6-.7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+function favBtn(id){return `<button class="fav ${isFav(id)?"on":""}" data-fav="${id}" aria-pressed="${isFav(id)}" title="Отметить трудный вопрос">${STAR}<span>${isFav(id)?"Отмечен":"Отметить"}</span></button>`}
+
+/* ---------- графики и показатели ---------- */
+const GOAL=30;
+function actOn(i,act){return (act||S.act||{})[dayKey(new Date(Date.now()-i*864e5))]||0}
+function streak(act){let n=0;for(let i=0;i<400;i++){if(actOn(i,act))n++;else if(i===0)continue;else break}return n}
+function pace(act){let s=0;for(let i=0;i<7;i++)s+=actOn(i,act);return s/7}
+const WD=["вс","пн","вт","ср","чт","пт","сб"];
+function activityChart(days,getv,goal,label){
+  const W0=360,H0=150,pl=8,pr=8,pt=18,pb=26,cw=(W0-pl-pr)/days;const vals=[];for(let i=days-1;i>=0;i--)vals.push(getv(i));
+  const top1=Math.max(...vals);const mx=Math.max(goal||0,top1,5)*1.08;const sy=v=>pt+(H0-pt-pb)*(1-v/mx);
+  let g=`<svg class="chart" viewBox="0 0 ${W0} ${H0}" role="img" aria-label="${esc(label)}">`;
+  g+=`<line x1="${pl}" x2="${W0-pr}" y1="${H0-pb}" y2="${H0-pb}" stroke="var(--line)"/>`;
+  if(goal){g+=`<line x1="${pl}" x2="${W0-pr}" y1="${sy(goal)}" y2="${sy(goal)}" stroke="var(--blaze)" stroke-dasharray="4 4" stroke-width="1.5"/><text x="${pl+2}" y="${sy(goal)-5}" font-size="11" fill="var(--blaze)">цель ${goal}</text>`}
+  vals.forEach((v,i)=>{const x=pl+i*cw+cw*.18,w=cw*.64,y=sy(v),today=i===days-1;const d=new Date(Date.now()-(days-1-i)*864e5);
+    g+=`<rect x="${x.toFixed(1)}" y="${(v?y:H0-pb-2).toFixed(1)}" width="${w.toFixed(1)}" height="${(v?H0-pb-y:2).toFixed(1)}" rx="3" fill="${today?"var(--blaze)":goal&&v>=goal?"var(--moss)":v?"var(--moss-mid)":"var(--line)"}"><title>${d.toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}: ${v}</title></rect>`;
+    if(v&&(today||v===top1))g+=`<text x="${(x+w/2).toFixed(1)}" y="${(y-4).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${v}</text>`;
+    if(days<=14||i%5===0||today)g+=`<text x="${(x+w/2).toFixed(1)}" y="${H0-pb+15}" text-anchor="middle" font-size="10.5" fill="${today?"var(--blaze)":"var(--muted)"}">${days<=14?WD[d.getDay()]:d.getDate()}</text>`;
+  });
+  return g+`</svg>`;
+}
+function examChart(ex){
+  ex=ex.slice(-15);if(ex.length<2)return"";
+  const W0=360,H0=150,pl=36,pr=14,pt=18,pb=14;const sx=i=>pl+(W0-pl-pr)*(i/(ex.length-1));const sy=v=>pt+(H0-pt-pb)*(1-v);
+  let g=`<svg class="chart" viewBox="0 0 ${W0} ${H0}" role="img" aria-label="Результаты экзаменов">`;
+  [0,.5,.8,1].forEach(v=>{g+=`<line x1="${pl}" x2="${W0-pr}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--line)" ${v===.8?'stroke-dasharray="3 4"':""}/><text x="${pl-6}" y="${sy(v)+4}" text-anchor="end" font-size="10.5" fill="var(--muted)">${v*100}%</text>`});
+  const pts=ex.map((e,i)=>[+sx(i).toFixed(1),+sy(e.ok/e.n).toFixed(1)]);
+  g+=`<path d="M${pts.map(p=>p.join(",")).join("L")}L${pts[pts.length-1][0]},${sy(0)}L${pts[0][0]},${sy(0)}Z" fill="var(--moss)" opacity=".12"/>`;
+  g+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--moss)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  ex.forEach((e,i)=>{const [x,y]=pts[i];const full=e.ok===e.n;g+=`<circle cx="${x}" cy="${y}" r="${i===ex.length-1?5.5:4}" fill="${full?"var(--ok)":"var(--paper)"}" stroke="${full?"var(--ok)":"var(--moss)"}" stroke-width="2"><title>${new Date(e.d).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}: ${e.ok} из ${e.n}</title></circle>`});
+  const l=ex[ex.length-1],lp=pts[pts.length-1];g+=`<text x="${lp[0]-8}" y="${lp[1]<pt+14?lp[1]+18:lp[1]-10}" text-anchor="end" font-size="12" font-weight="700" fill="var(--ink)">${l.ok}/${l.n}</text>`;
+  return g+`</svg>`;
+}
+function plural(n,a,b,c){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return c;if(n1>1&&n1<5)return b;if(n1===1)return a;return c}
+function readiness(){
+  const a=stats(QS);const left=a.n-a.l;const p=pace();
+  const need=QS.reduce((s,q)=>{const x=S.st[q.id];return s+(x&&x.b>=3?0:3-(x?x.b:0)+(x&&x.m?1:0))},0);
+  if(!left)return "Всё выучено. Держи форму: экзамен на 40 вопросов раз в пару дней.";
+  if(p<1)return "Прогноз появится, когда позанимаешься пару дней. Хватит 15 минут в день.";
+  const d=Math.max(1,Math.ceil(need*1.3/p));const dt=new Date(Date.now()+d*864e5);
+  return `При твоём темпе (≈${Math.round(p)} ${plural(Math.round(p),"ответ","ответа","ответов")} в день) всё выучишь примерно за <b>${d} ${plural(d,"день","дня","дней")}</b>, к ${dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}.`;
 }
 
 /* ---------- сессии ---------- */
@@ -532,8 +654,9 @@ function pickSmart(n,pool){
   return scored.slice(0,n).map(z=>z[1]);
 }
 function start(kind,list,title){
-  if(!list.length){app.innerHTML=top(title,1)+`<div class="card"><p>Здесь пока пусто. Пройди тренировку — вопросы, где ошибёшься, появятся тут.</p><div class="actions"><button class="btn blaze" data-go="smart">Начать тренировку</button></div></div>`;return}
+  if(!list.length){app.innerHTML=top(title,1)+`<div class="card"><p>${kind==="favs"?"Отмеченных вопросов пока нет. Во время тренировки нажимай звёздочку «Отметить» у трудных вопросов — они соберутся здесь.":"Здесь пока пусто. Пройди тренировку — вопросы, где ошибёшься, появятся тут."}</p><div class="actions"><button class="btn blaze" data-go="smart">Начать тренировку</button></div></div>`;return}
   SES={kind,title,list,i:0,ans:[],order:null};
+  prefetchSpecies(list);
   renderQ();
 }
 function renderQ(){
@@ -542,11 +665,12 @@ function renderQ(){
   s.picked=null;
   const exam=s.kind==="exam";
   app.innerHTML=`<div class="qhead"><button class="iconbtn" data-go="home" aria-label="Выйти">✕</button><div class="prog"><i style="width:${s.i/s.list.length*100}%"></i></div><span class="cnt">${s.i+1}/${s.list.length}</span></div>
-  <div class="card"><div class="qmeta"><span class="ic">${ICON[TOP[q.t].i]}</span><div><div class="label">${TOP[q.t].n}</div><div class="num">Вопрос ${q.id.replace("-2"," (второй)")}${exam?" · экзамен":""}</div></div></div>
+  <div class="card">${photoHTML(q)}<div class="qmeta"><span class="ic">${ICON[TOP[q.t].i]}</span><div><div class="label">${TOP[q.t].n}</div><div class="num">Вопрос ${q.id.replace("-2"," (второй)")}${exam?" · экзамен":""}</div></div><span class="sp"></span>${favBtn(q.id)}</div>
   <div class="qtext">${esc(q.q)}</div>
   <div class="opts">${s.order.map((k,pos)=>`<button class="opt" data-pick="${pos}"><span class="k">${L[pos]}</span><span>${esc(q.o[k])}</span></button>`).join("")}</div>
   <div id="after"></div>
   <p class="hint">${matchMedia("(hover:hover)").matches?"Клавиши 1–3 — выбор, Enter — дальше.":""}</p></div>`;
+  fillPhotos(app);
 }
 function pick(pos){
   const s=SES;if(s.picked!==null)return;const q=s.list[s.i];const k=s.order[pos];const ok=k===q.c;s.picked=pos;
@@ -558,7 +682,7 @@ function pick(pos){
   const last=s.i===s.list.length-1;
   const nextBtn=`<div class="actions"><button class="btn blaze wide" data-next>${last?"Результат":"Дальше →"}</button></div>`;
   if(exam){document.getElementById("after").innerHTML=nextBtn}
-  else document.getElementById("after").innerHTML=explainHTML(q,ok)+nextBtn;
+  else{document.getElementById("after").innerHTML=explainHTML(q,ok)+nextBtn;fillInfo(app)}
   const nb=document.querySelector("[data-next]");if(nb)nb.focus({preventScroll:true});
   if(!exam){const v=document.querySelector(".verdict");if(v&&v.getBoundingClientRect().top>innerHeight-120)v.scrollIntoView({behavior:"smooth",block:"center"})}
 }
@@ -567,6 +691,7 @@ function explainHTML(q,ok){
   ${ok?"":`<p><b>Правильно:</b> ${esc(q.o[q.c])}</p>`}
   <p class="why"><b>Почему.</b> ${esc(q.e)}</p>
   <p class="tip">${TOP[q.t].tip}</p>
+  ${infoHTML(q)}
   ${q.note?`<p class="docnote"><b>Опечатка в документе.</b> ${esc(q.note)}</p>`:""}</div>`;
 }
 function next(){const s=SES;s.i++;if(s.i>=s.list.length)result();else{renderQ();scrollTo(0,0)}}
@@ -595,11 +720,12 @@ function flashStart(){FL={list:pickSmart(20),i:0,open:false};flashR()}
 function flashR(){
   const q=FL.list[FL.i];
   app.innerHTML=`<div class="qhead"><button class="iconbtn" data-go="home" aria-label="Выйти">✕</button><div class="prog"><i style="width:${FL.i/FL.list.length*100}%"></i></div><span class="cnt">${FL.i+1}/${FL.list.length}</span></div>
-  <div class="card flash"><div class="qmeta"><span class="ic">${ICON[TOP[q.t].i]}</span><div><div class="label">${TOP[q.t].n}</div><div class="num">Вопрос ${q.id}</div></div></div>
+  <div class="card flash">${photoHTML(q)}<div class="qmeta"><span class="ic">${ICON[TOP[q.t].i]}</span><div><div class="label">${TOP[q.t].n}</div><div class="num">Вопрос ${q.id}</div></div></div>
   <div class="qtext">${esc(q.q)}</div>
   ${FL.open?`<div class="ans"><div class="label">Ответ</div><div class="a">${esc(q.o[q.c])}</div><p class="why" style="margin:8px 0">${esc(q.e)}</p>${q.note?`<p class="docnote"><b>Опечатка в документе.</b> ${esc(q.note)}</p>`:""}
   <div class="actions"><button class="btn ghost wide" data-fl="0">Не вспомнил</button><button class="btn wide" data-fl="1">Знал</button></div></div>`
   :`<p class="sub" style="margin:0">Сначала ответь вслух или про себя, без вариантов. Это тренирует память сильнее, чем выбор из трёх.</p><div class="actions"><button class="btn blaze wide" data-flopen>Показать ответ</button></div>`}</div>`;
+  fillPhotos(app);
 }
 
 /* ---------- шпаргалка ---------- */
@@ -751,6 +877,7 @@ function mergeRemote(r){
   const rs=r.st||{};Object.keys(rs).forEach(id=>{const cur=S.st[id],x=rs[id];if(!x||!BYID[id])return;if(!cur||(x.s||0)>(cur.s||0))S.st[id]=x});
   const seen={};S.exams=(S.exams||[]).concat(r.exams||[]).filter(e=>{if(!e||seen[e.d])return false;seen[e.d]=1;return true}).sort((a,b)=>a.d-b.d).slice(-30);
   S.act=S.act||{};Object.keys(r.act||{}).forEach(k=>{S.act[k]=Math.max(S.act[k]||0,r.act[k])});
+  S.fav=Object.assign({},r.fav||{},S.fav||{});
   save();
 }
 async function pull(){
@@ -764,7 +891,7 @@ async function push(){
   try{
     await DB.collection("users").doc(USER.uid).set({
       name:USER.displayName||"",email:USER.email||"",photo:USER.photoURL||"",
-      st:S.st,exams:S.exams||[],act:S.act||{},
+      st:S.st,exams:S.exams||[],act:S.act||{},fav:S.fav||{},
       learned:a.l,seen:a.s,mistakes:a.m,
       updated:firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -781,6 +908,7 @@ function cloudInit(){
     if(u){S.uid=u.uid;save()}
     USER=u;CLOUD_STATE=u?"sync":"off";rerender();if(u){await pull();rerender()}});
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&PUSH_T)push()});
+  addEventListener("online",()=>{if(USER&&CLOUD_STATE==="err")push()});
 }
 function login(){
   const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});
@@ -815,6 +943,10 @@ function adminRender(){
    <div class="card"><div class="label">Участников</div><div class="n">${U.length}</div></div>
    <div class="card"><div class="label">Занимались за 7 дней</div><div class="n">${act7}</div></div>
    <div class="card"><div class="label">Почти готовы (230+)</div><div class="n">${ready}</div></div></div>
+   <div class="dash">
+    <div class="card"><div class="label">Ответов в день, все вместе · 30 дней</div>${activityChart(30,i=>U.reduce((t,u)=>t+actOn(i,u.act),0),0,"Ответы всех участников по дням")}<p class="cap">Сегодня — оранжевым.</p></div>
+    <div class="card"><div class="label">Уровень подготовки</div>${levelChart(U)}<p class="cap">Сколько человек на каждом уровне по числу выученных вопросов.</p></div>
+   </div>
    <div class="sec-h"><h2>Люди</h2><button class="iconbtn" data-go="admin">Обновить</button></div>
    <div class="tbl"><table><thead><tr><th>Кто</th><th>Выучено</th><th>Ошибки</th><th>Ответов за 7 дн.</th><th>14 дней</th><th>Экзамены</th><th>Был</th></tr></thead><tbody>`;
   U.forEach(u=>{const ex=u.exams||[];const le=ex[ex.length-1];const best=ex.filter(e=>e.n>=20).reduce((m,e)=>Math.max(m,e.ok/e.n),0);
@@ -831,10 +963,19 @@ function adminRender(){
    <div class="wrong-list">${hard.length?hard.map(([id,r])=>{const q=BYID[id];return `<div class="wl"><div class="label">Вопрос ${id} · ${TOP[q.t].n} · ошибок ${Math.round(r*100)}% · ответили ${qa[id].p} чел.</div><div class="q">${esc(q.q)}</div><div class="a">✓ ${esc(q.o[q.c])}</div></div>`}).join(""):`<p class="sub">Пока мало ответов для статистики.</p>`}</div>`;
   app.innerHTML=h;
 }
+function levelChart(U){
+  const B=[["0–25%",0,.25],["25–50%",.25,.5],["50–75%",.5,.75],["75–90%",.75,.9],["90–100%",.9,1.01]];
+  const cnt=B.map(b=>U.filter(u=>{const r=(u.learned||0)/QS.length;return r>=b[1]&&r<b[2]}).length);const mx=Math.max(1,...cnt);
+  const W0=360,H0=150,row=24,pl=70,pr=30;let g=`<svg class="chart" viewBox="0 0 ${W0} ${H0}" role="img" aria-label="Распределение по уровню подготовки">`;
+  B.forEach((b,i)=>{const y=10+i*(row+4),w=(W0-pl-pr)*cnt[i]/mx;
+    g+=`<text x="${pl-8}" y="${y+16}" text-anchor="end" font-size="11.5" fill="var(--muted)">${b[0]}</text><rect x="${pl}" y="${y}" width="${Math.max(2,w).toFixed(1)}" height="${row}" rx="4" fill="${i===4?"var(--ok)":i>=2?"var(--moss)":"var(--moss-mid)"}"/><text x="${(pl+Math.max(2,w)+6).toFixed(1)}" y="${y+16}" font-size="12" font-weight="700" fill="var(--ink)">${cnt[i]}</text>`});
+  return g+`</svg>`;
+}
 function userDetail(uid){
   const u=ADM.find(x=>x.id===uid);if(!u)return;
   const box=document.getElementById("udet");
-  box.innerHTML=`<div class="card" style="margin-top:12px"><div class="sec-h" style="margin:0 0 10px"><h2>${esc(u.name||u.email)}</h2><span class="label">по темам</span></div><div class="topics">`+ORDER.map(k=>{const list=QS.filter(q=>q.t===k);let l=0,s=0;list.forEach(q=>{const x=(u.st||{})[q.id];if(x&&x.s)s++;if(x&&x.b>=3)l++});
+  box.innerHTML=`<div class="card" style="margin-top:12px"><div class="sec-h" style="margin:0 0 10px"><h2>${esc(u.name||u.email)}</h2><span class="label">${streak(u.act)} ${plural(streak(u.act),"день","дня","дней")} подряд</span></div>
+  <div class="dash" style="margin:0 0 12px"><div><div class="label">Ответы за 30 дней</div>${activityChart(30,i=>actOn(i,u.act),0,"Ответы по дням")}</div>${(u.exams||[]).length>=2?`<div><div class="label">Экзамены</div>${examChart(u.exams)}</div>`:""}</div><div class="topics">`+ORDER.map(k=>{const list=QS.filter(q=>q.t===k);let l=0,s=0;list.forEach(q=>{const x=(u.st||{})[q.id];if(x&&x.s)s++;if(x&&x.b>=3)l++});
    return `<div class="topic" style="cursor:default"><span class="ic">${ICON[TOP[k].i]}</span><span><b>${TOP[k].n}</b><small>${l} из ${list.length} выучено</small><span class="bar"><i class="g" style="width:${l/list.length*100}%"></i><i class="y" style="width:${(s-l)/list.length*100}%"></i></span></span></div>`}).join("")+`</div></div>`;
   box.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -851,11 +992,13 @@ function go(v){SES=null;FL=null;CUR=v;scrollTo(0,0);
   else if(v==="settings"){resetArm=false;settings()}
   else if(v==="sync")syncView();
   else if(v==="admin")admin();
+  else if(v==="favs")start("favs",shuffle(QS.filter(q=>isFav(q.id))),"Отмеченные вопросы");
 }
 app.addEventListener("click",e=>{
   const tr=e.target.closest("tr[data-user]");if(tr)return userDetail(tr.dataset.user);
   const t=e.target.closest("button");if(!t)return;
   if(t.dataset.go)return go(t.dataset.go);
+  if(t.dataset.fav){const id=t.dataset.fav;toggleFav(id);const on=isFav(id);t.classList.toggle("on",on);t.setAttribute("aria-pressed",on);t.querySelector("span").textContent=on?"Отмечен":"Отметить";return}
   if(t.hasAttribute("data-login"))return login();
   if(t.hasAttribute("data-logout")){const done=()=>{S.st={};S.exams=[];S.act={};S.uid=null;save();firebase.auth().signOut()};if(PUSH_T)push().then(done);else done();return}
   if(t.dataset.topic){const k=t.dataset.topic;return start("topic",pickSmart(20,QS.filter(q=>q.t===k)),TOP[k].n)}
@@ -881,4 +1024,4 @@ if(!syncIncoming())home();
 cloudInit();
 })();
 </script>
-</body></html>
+<script>if("serviceWorker" in navigator&&location.protocol==="https:")addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script></body></html>
