@@ -143,6 +143,22 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .toggle::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s}
 .toggle.on{background:var(--moss)} .toggle.on::after{left:25px}
 .danger{color:var(--bad);border-color:var(--bad)}
+.acct{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin:0 0 14px}
+.acct img{width:40px;height:40px;border-radius:50%}
+.acct .sp{flex:1}
+.muted{color:var(--muted);font-size:14px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpis .n{font-family:var(--f-display);font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:var(--r)}
+.tbl table{border-collapse:collapse;width:100%;min-width:720px;font-size:15px}
+.tbl th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr{cursor:pointer}.tbl tbody tr:hover{background:var(--moss-soft)}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.mini{height:6px;width:90px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:4px}.mini i{display:block;height:100%;background:var(--ok)}
+.spk{width:70px;height:16px;display:block}
+@media (max-width:560px){.kpis{grid-template-columns:1fr}}
 @media (max-width:560px){
   body{font-size:16.5px}
   .modes,.topics,.memo{grid-template-columns:1fr}
@@ -155,6 +171,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 
 <div class="wrap" id="app"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 // [№, тема, вопрос, [варианты], индекс верного, пояснение, примечание к документу]
 const Q = [
@@ -464,7 +483,10 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function st(id){return S.st[id]||(S.st[id]={b:0,s:0,w:0,m:0,t:0})}
 function learned(id){const x=S.st[id];return x&&x.b>=3}
 function inMist(id){const x=S.st[id];return x&&x.m}
-function record(id,ok){const x=st(id);x.s++;x.t=Date.now();if(ok){x.b=Math.min(5,x.b+1);if(x.m&&x.b>=2)x.m=0}else{x.w++;x.b=0;x.m=1}save()}
+function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function record(id,ok){const x=st(id);x.s++;x.t=Date.now();if(ok){x.b=Math.min(5,x.b+1);if(x.m&&x.b>=2)x.m=0}else{x.w++;x.b=0;x.m=1}
+  S.act=S.act||{};const k=dayKey();S.act[k]=(S.act[k]||0)+1;const ks=Object.keys(S.act).sort();while(ks.length>90)delete S.act[ks.shift()];
+  save();schedulePush()}
 const app=document.getElementById("app");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -473,9 +495,9 @@ function ring(p){const r=40,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0
 function top(title,back){return `<div class="top">${back?`<button class="iconbtn" data-go="home" aria-label="На главную">← Назад</button>`:""}<h1>${title}</h1><span class="sp"></span>${back?"":`<button class="iconbtn" data-go="settings">Настройки</button>`}</div>`}
 
 /* ---------- главная ---------- */
-function home(){
+function home(){CUR="home";
   const a=stats(QS);
-  let h=top('Охот<b>минимум</b>')+`<p class="sub">Все 257 вопросов Минприроды (утв. 18.09.2025, № 21/12) с пояснениями. Прогресс сохраняется на этом устройстве.</p>
+  let h=top('Охот<b>минимум</b>')+`<p class="sub">Все 257 вопросов Минприроды (утв. 18.09.2025, № 21/12) с пояснениями.</p>${accountBar()}
   <div class="hero">${ring(a.l/a.n)}<div><div class="nums">
     <div><div class="label">Выучено</div><div class="n">${a.l} / ${a.n}</div></div>
     <div><div class="label">Пройдено</div><div class="n">${a.s}</div></div>
@@ -550,7 +572,7 @@ function explainHTML(q,ok){
 function next(){const s=SES;s.i++;if(s.i>=s.list.length)result();else{renderQ();scrollTo(0,0)}}
 function result(){
   const s=SES;const ok=s.ans.filter(a=>a.ok).length,n=s.ans.length;
-  if(s.kind==="exam"){S.exams.push({d:Date.now(),ok,n});S.exams=S.exams.slice(-30);save()}
+  if(s.kind==="exam"){S.exams.push({d:Date.now(),ok,n});S.exams=S.exams.slice(-30);save();schedulePush()}
   const wr=s.ans.filter(a=>!a.ok);
   const pct=Math.round(ok/n*100);
   const msg=ok===n?"Без ошибок. Так и надо на настоящем экзамене.":pct>=80?"Хорошо, но на экзамене лучше не рисковать. Разбери ошибки ниже.":"Ошибок пока много. Повтори шпаргалку по темам и пройди работу над ошибками.";
@@ -708,8 +730,115 @@ function syncIncoming(){
   return true;
 }
 
+
+/* ---------- облако: вход через Google, синхронизация, статистика ---------- */
+const FB_CONFIG={"apiKey":"AIzaSyCxUIqL9nATjRhfQ3Z87EZ0ZF2rwuWEAHY","authDomain":"ohotminimum-7c6fe.firebaseapp.com","projectId":"ohotminimum-7c6fe","storageBucket":"ohotminimum-7c6fe.firebasestorage.app","messagingSenderId":"410439334342","appId":"1:410439334342:web:d5978287a465f250ee9ac7"};
+const ADMINS=["mobsce@gmail.com"];
+let USER=null,DB=null,PUSH_T=null,CLOUD_STATE="off",CUR="home";
+const cloudOn=()=>!!(FB_CONFIG&&typeof firebase!=="undefined");
+const isAdmin=()=>!!(USER&&USER.email&&ADMINS.includes(USER.email.toLowerCase()));
+function accountBar(){
+  if(!cloudOn())return `<p class="sub">Прогресс сохраняется на этом устройстве.</p>`;
+  if(!USER)return `<div class="acct"><div><b>Войди через Google</b>, чтобы прогресс сохранялся и был виден на всех твоих устройствах.<div class="muted">Результаты увидит организатор тренажёра.</div></div><button class="btn" data-login>Войти через Google</button></div>`;
+  const st={off:"",sync:"синхронизация…",ok:"сохранено в облаке",err:"нет связи, сохранится позже"}[CLOUD_STATE]||"";
+  return `<div class="acct">${USER.photoURL?`<img src="${esc(USER.photoURL)}" alt="" referrerpolicy="no-referrer">`:""}<div><b>${esc(USER.displayName||USER.email)}</b><div class="muted">${st}</div></div><span class="sp"></span>${isAdmin()?`<button class="btn blaze" data-go="admin">Статистика</button>`:""}<button class="iconbtn" data-logout>Выйти</button></div>`;
+}
+function rerender(){if(SES||FL&&CUR==="flash")return;if(CUR==="home")home();else if(CUR==="settings")settings();}
+function mergeRemote(r){
+  if(!r)return;
+  const rs=r.st||{};Object.keys(rs).forEach(id=>{const cur=S.st[id],x=rs[id];if(!x||!BYID[id])return;if(!cur||(x.s||0)>(cur.s||0))S.st[id]=x});
+  const seen={};S.exams=(S.exams||[]).concat(r.exams||[]).filter(e=>{if(!e||seen[e.d])return false;seen[e.d]=1;return true}).sort((a,b)=>a.d-b.d).slice(-30);
+  S.act=S.act||{};Object.keys(r.act||{}).forEach(k=>{S.act[k]=Math.max(S.act[k]||0,r.act[k])});
+  save();
+}
+async function pull(){
+  if(!USER||!DB)return;CLOUD_STATE="sync";
+  try{const d=await DB.collection("users").doc(USER.uid).get();if(d.exists)mergeRemote(d.data());await push(true)}catch(e){CLOUD_STATE="err";console.warn(e)}
+}
+function schedulePush(){if(!USER||!DB)return;clearTimeout(PUSH_T);PUSH_T=setTimeout(()=>push(),2500)}
+async function push(){
+  if(!USER||!DB)return;clearTimeout(PUSH_T);
+  const a=stats(QS);
+  try{
+    await DB.collection("users").doc(USER.uid).set({
+      name:USER.displayName||"",email:USER.email||"",photo:USER.photoURL||"",
+      st:S.st,exams:S.exams||[],act:S.act||{},
+      learned:a.l,seen:a.s,mistakes:a.m,
+      updated:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    CLOUD_STATE="ok";
+  }catch(e){CLOUD_STATE="err";console.warn(e)}
+  const m=document.querySelector(".acct .muted");if(m&&USER)m.textContent=CLOUD_STATE==="ok"?"сохранено в облаке":"нет связи, сохранится позже";
+}
+function cloudInit(){
+  if(!cloudOn())return;
+  try{firebase.initializeApp(FB_CONFIG);DB=firebase.firestore();}catch(e){console.warn(e);return}
+  firebase.auth().getRedirectResult().catch(()=>{});
+  firebase.auth().onAuthStateChanged(async u=>{
+    if(u&&S.uid&&S.uid!==u.uid){S.st={};S.exams=[];S.act={}}
+    if(u){S.uid=u.uid;save()}
+    USER=u;CLOUD_STATE=u?"sync":"off";rerender();if(u){await pull();rerender()}});
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&PUSH_T)push()});
+}
+function login(){
+  const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});
+  firebase.auth().signInWithPopup(p).catch(e=>{
+    if(["auth/popup-blocked","auth/operation-not-supported-in-this-environment","auth/web-storage-unsupported"].includes(e.code))return firebase.auth().signInWithRedirect(p);
+    if(e.code==="auth/popup-closed-by-user"||e.code==="auth/cancelled-popup-request")return;
+    alertBox("Не получилось войти: "+(e.message||e.code));
+  });
+}
+function alertBox(t){const b=document.createElement("p");b.className="docnote";b.textContent=t;const a=document.querySelector(".acct");if(a)a.after(b);else app.prepend(b)}
+
+/* ---------- статистика для организатора ---------- */
+function fmtAgo(d){if(!d)return"—";const m=(Date.now()-d)/6e4;if(m<2)return"только что";if(m<60)return Math.round(m)+" мин назад";const h=m/60;if(h<24)return Math.round(h)+" ч назад";const dd=Math.round(h/24);return dd===1?"вчера":dd+" дн. назад"}
+function sumDays(act,n){let s=0;for(let i=0;i<n;i++){const d=new Date(Date.now()-i*864e5);s+=act&&act[dayKey(d)]||0}return s}
+function spark(act){let h='<svg class="spk" viewBox="0 0 70 16" aria-hidden="true">';let mx=1;const v=[];for(let i=13;i>=0;i--){const x=act&&act[dayKey(new Date(Date.now()-i*864e5))]||0;v.push(x);mx=Math.max(mx,x)}v.forEach((x,i)=>{const hh=x?Math.max(2,x/mx*14):1;h+=`<rect x="${i*5}" y="${16-hh}" width="4" height="${hh}" rx="1" fill="${x?"var(--moss)":"var(--line)"}"/>`});return h+"</svg>"}
+let ADM=null;
+async function admin(){
+  CUR="admin";
+  app.innerHTML=top("Статистика",1)+`<p class="sub">Загружаю данные…</p>`;
+  if(!isAdmin()){app.innerHTML=top("Статистика",1)+`<div class="card"><p>Эта страница доступна только организатору.</p></div>`;return}
+  try{const snap=await DB.collection("users").get();ADM=snap.docs.map(d=>{const x=d.data();x.id=d.id;x.upd=x.updated&&x.updated.toDate?x.updated.toDate().getTime():0;return x})}
+  catch(e){app.innerHTML=top("Статистика",1)+`<div class="card"><p>Не удалось загрузить: ${esc(e.message||e.code)}</p><p class="sub">Проверь, что в Firestore вставлены правила доступа.</p></div>`;return}
+  adminRender();
+}
+function adminRender(){
+  const U=ADM.slice().sort((a,b)=>b.upd-a.upd);
+  const act7=U.filter(u=>sumDays(u.act,7)>0).length;
+  const ready=U.filter(u=>(u.learned||0)>=230).length;
+  const qa={};U.forEach(u=>Object.keys(u.st||{}).forEach(id=>{const x=u.st[id];if(!x||!x.s)return;const z=qa[id]||(qa[id]={s:0,w:0,p:0});z.s+=x.s;z.w+=x.w||0;z.p++}));
+  const hard=Object.keys(qa).filter(id=>BYID[id]&&qa[id].s>=3).map(id=>[id,qa[id].w/qa[id].s]).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  let h=top("Статистика",1)+`<div class="kpis">
+   <div class="card"><div class="label">Участников</div><div class="n">${U.length}</div></div>
+   <div class="card"><div class="label">Занимались за 7 дней</div><div class="n">${act7}</div></div>
+   <div class="card"><div class="label">Почти готовы (230+)</div><div class="n">${ready}</div></div></div>
+   <div class="sec-h"><h2>Люди</h2><button class="iconbtn" data-go="admin">Обновить</button></div>
+   <div class="tbl"><table><thead><tr><th>Кто</th><th>Выучено</th><th>Ошибки</th><th>Ответов за 7 дн.</th><th>14 дней</th><th>Экзамены</th><th>Был</th></tr></thead><tbody>`;
+  U.forEach(u=>{const ex=u.exams||[];const le=ex[ex.length-1];const best=ex.filter(e=>e.n>=20).reduce((m,e)=>Math.max(m,e.ok/e.n),0);
+    const l=u.learned||0;
+    h+=`<tr data-user="${esc(u.id)}"><td><b>${esc(u.name||"Без имени")}</b><div class="muted">${esc(u.email||"")}</div></td>
+      <td><div class="mini"><i style="width:${l/257*100}%"></i></div><span class="num">${l} / 257</span></td>
+      <td class="num">${u.mistakes||0}</td><td class="num">${sumDays(u.act,7)}</td><td>${spark(u.act)}</td>
+      <td class="num">${ex.length?`${ex.length} · посл. ${le.ok}/${le.n}${best?` · лучш. ${Math.round(best*100)}%`:""}`:"—"}</td>
+      <td class="num">${fmtAgo(u.upd)}</td></tr>`});
+  h+=`</tbody></table></div>${U.length?"":`<p class="sub">Пока никто не вошёл. Когда люди войдут через Google на сайте, они появятся здесь.</p>`}
+   <p class="sub">«Выучено» — вопрос отвечен верно 3 раза подряд. Нажми на человека, чтобы увидеть прогресс по темам.</p>
+   <div id="udet"></div>
+   <div class="sec-h"><h2>Самые трудные вопросы</h2><span class="label">доля ошибок по всем</span></div>
+   <div class="wrong-list">${hard.length?hard.map(([id,r])=>{const q=BYID[id];return `<div class="wl"><div class="label">Вопрос ${id} · ${TOP[q.t].n} · ошибок ${Math.round(r*100)}% · ответили ${qa[id].p} чел.</div><div class="q">${esc(q.q)}</div><div class="a">✓ ${esc(q.o[q.c])}</div></div>`}).join(""):`<p class="sub">Пока мало ответов для статистики.</p>`}</div>`;
+  app.innerHTML=h;
+}
+function userDetail(uid){
+  const u=ADM.find(x=>x.id===uid);if(!u)return;
+  const box=document.getElementById("udet");
+  box.innerHTML=`<div class="card" style="margin-top:12px"><div class="sec-h" style="margin:0 0 10px"><h2>${esc(u.name||u.email)}</h2><span class="label">по темам</span></div><div class="topics">`+ORDER.map(k=>{const list=QS.filter(q=>q.t===k);let l=0,s=0;list.forEach(q=>{const x=(u.st||{})[q.id];if(x&&x.s)s++;if(x&&x.b>=3)l++});
+   return `<div class="topic" style="cursor:default"><span class="ic">${ICON[TOP[k].i]}</span><span><b>${TOP[k].n}</b><small>${l} из ${list.length} выучено</small><span class="bar"><i class="g" style="width:${l/list.length*100}%"></i><i class="y" style="width:${(s-l)/list.length*100}%"></i></span></span></div>`}).join("")+`</div></div>`;
+  box.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
 /* ---------- маршрутизация ---------- */
-function go(v){SES=null;scrollTo(0,0);
+function go(v){SES=null;FL=null;CUR=v;scrollTo(0,0);
   if(v==="home")home();
   else if(v==="smart")start("smart",pickSmart(15),"Умная тренировка");
   else if(v==="exam")examSetup();
@@ -719,10 +848,14 @@ function go(v){SES=null;scrollTo(0,0);
   else if(v==="ref")ref();
   else if(v==="settings"){resetArm=false;settings()}
   else if(v==="sync")syncView();
+  else if(v==="admin")admin();
 }
 app.addEventListener("click",e=>{
+  const tr=e.target.closest("tr[data-user]");if(tr)return userDetail(tr.dataset.user);
   const t=e.target.closest("button");if(!t)return;
   if(t.dataset.go)return go(t.dataset.go);
+  if(t.hasAttribute("data-login"))return login();
+  if(t.hasAttribute("data-logout")){const done=()=>{S.st={};S.exams=[];S.act={};S.uid=null;save();firebase.auth().signOut()};if(PUSH_T)push().then(done);else done();return}
   if(t.dataset.topic){const k=t.dataset.topic;return start("topic",pickSmart(20,QS.filter(q=>q.t===k)),TOP[k].n)}
   if(t.dataset.pick!==undefined)return pick(+t.dataset.pick);
   if(t.hasAttribute("data-next"))return next();
@@ -743,6 +876,7 @@ document.addEventListener("keydown",e=>{
   else if((e.key==="Enter"||e.key===" ")&&SES.picked!==null&&document.activeElement?.dataset?.next===undefined){e.preventDefault();next()}
 });
 if(!syncIncoming())home();
+cloudInit();
 })();
 </script>
 </body></html>
