@@ -314,6 +314,20 @@ tr.hl td{background:var(--blaze-soft)}
 body.noscroll{overflow:hidden}
 @media (min-width:700px){.modal{align-items:center}.modal-card{border-radius:18px}}
 @media (max-width:640px){.sc-wrap,.dc{grid-template-columns:1fr}}
+.reg-pick{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;background:var(--paper);border:1.5px solid var(--moss);border-radius:var(--r);padding:12px 16px}
+.reg-pick small{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.reg-pick b{font-family:var(--f-display);font-size:22px}
+.reg-chg{color:var(--moss);font-weight:700;white-space:nowrap}
+.reg-modal .search{margin-bottom:8px}
+.reg-list{display:grid;gap:2px}
+.reg-d{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:12px 4px 4px}
+.reg-i{text-align:left;border:0;background:transparent;border-radius:10px;padding:9px 10px;font-size:16px;display:flex;justify-content:space-between;gap:10px}
+.reg-i:hover{background:var(--moss-soft)}.reg-i.on{background:var(--moss);color:#fff}
+.reg-i small{color:var(--muted);font-size:12.5px;white-space:nowrap}.reg-i.on small{color:#fff}
+.closed-note{border-color:var(--bad);background:var(--bad-soft)}.closed-note h3{color:var(--bad);font-size:20px}
+.pill{display:inline-block;font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 10px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.src a{color:var(--moss)}
 @media (max-width:560px){
   body{font-size:16.5px}
   .modes,.topics,.memo{grid-template-columns:1fr}
@@ -689,7 +703,7 @@ function home(){CUR="home";
     <button class="mode" data-go="schemes">${ICON.scheme.replace('width="18" height="18"','')}<span><b>Схемы</b><small>Бланк разрешения, загон, какие документы взять</small></span></button>
     <button class="mode" data-go="cheat">${ICON.cal}<span><b>Шпаргалка и как учить</b><small>Календарь сроков, приёмы запоминания</small></span></button>
     <button class="mode" data-go="ref">${ICON.list}<span><b>Все вопросы с ответами</b><small>Поиск по тексту и темам</small></span></button>
-    <button class="mode" data-go="region">${ICON.map}<span><b>Сроки в Красноярском крае</b><small>Реальные даты, весна по зонам, что открыто сегодня</small></span></button>
+    <button class="mode" data-go="region">${ICON.map}<span><b>Сроки в регионе</b><small>${esc(S.regionName||"Красноярский край")} · реальные даты и что открыто сегодня</small></span></button>
     <button class="mode" data-go="check">${ICON.check}<span><b>Перед выездом</b><small>Чек-лист документов и действий на охоте</small></span></button>
     <button class="mode" data-go="print">${ICON.printer}<span><b>Для печати</b><small>Шпаргалка на A4 и карманные карточки</small></span></button>
   </div>
@@ -976,58 +990,55 @@ function openNowHTML(rows,title){
 }
 const CAL_LEGEND=`<div class="legend"><span><i class="lg u"></i>все половозрастные группы</span><span><i class="lg m"></i>только взрослые самцы</span><span><i class="lg b"></i>медведи</span><span><i class="lg f"></i>пушные</span><span><i class="lg p"></i>пернатая дичь</span><span><i class="lg s"></i>весенняя охота</span></div>`;
 
-/* ---------- Красноярский край ---------- */
-const P=(m1,d1,m2,d2,txt)=>{const p=[m1,d1,m2,d2];if(txt)p.txt=txt;return p};
-const REG=[
- ["Копытные",null],
- ["Лось",[P(9,15,1,10)],"u"],["Самцы лося",[P(9,1,9,30)],"m"],
- ["Дикий северный олень",[P(9,15,12,15)],"u","В крае короче федерального: до 15 декабря"],
- ["Косуля сибирская",[P(10,1,1,10)],"u"],["Самцы косули",[P(8,20,9,20)],"m"],
- ["Благородный олень (марал)",[P(10,1,1,10)],"u"],["Самцы марала",[P(9,1,9,30)],"m"],["Панты марала",[P(6,1,7,15)],"m"],
- ["Кабан",[P(8,1,2,28)],"u","В крае с 1 августа, а не с 1 июня"],
- ["Кабарга",[P(11,1,12,31)],"u","Источники расходятся: до 31 декабря или до 31 января. Уточни в охотнадзоре"],
- ["Овцебык, сибирский горный козёл",[P(8,1,11,30)],"u"],
- ["Снежный баран",[],"u"],
- ["Медведь",null],
- ["Бурый медведь",[P(4,15,6,10),P(8,1,12,31)],"b","Весна в крае — с 15 апреля"],
- ["Пушные",null],
- ["Волк",[P(8,1,3,31)],"f"],["Заяц-беляк, лисица",[P(9,15,2,28)],"f"],["Песец, водяная полёвка",[P(10,1,3,31)],"f"],
- ["Ондатра",[P(9,10,2,28)],"f"],["Бобр, выдра",[P(10,1,2,28)],"f"],
- ["Соболь, белка, горностай, рысь, росомаха, колонок, норка, куница",[P(10,15,2,28)],"f"],
- ["Барсук",[P(8,15,10,31)],"f"],["Бурундук",[P(9,15,10,31)],"f"],
- ["Пернатая дичь — осень и зима",null,"","В 2026 году открытие 29 августа (последняя суббота)"],
- ["Утки, гуси, болотно-луговая, полевая, степная",[P(8,29,12,31,"последняя суббота августа – 31 дек")],"p"],
- ["Глухарь, тетерев, рябчик",[P(8,29,2,28,"последняя суббота августа – 28 фев")],"p"],
- ["Белая и тундряная куропатки",[P(8,15,4,20,"третья суббота августа – 20 апр")],"p"],
- ["Болотно-луговая с подружейной собакой",[P(8,1,11,30)],"p"],
- ["Боровая с подружейной собакой",[P(8,5,1,15)],"p"],
- ["Дрозды, грач",[P(8,29,11,30,"последняя суббота августа – 30 ноя")],"p"],
- ["Вороны, сорока",[P(8,29,1,15,"последняя суббота августа – 15 янв")],"p"],
- ["Весна 2027 — Норильск и Таймыр",null,"","10 календарных дней"],
- ["Норильск, юг Таймыра: утки и гуси",[P(5,22,5,31)],"s","Зона «д»: с четвёртой субботы мая"],
- ["Норильск, юг Таймыра: глухарь, тетерев, вальдшнеп",[P(5,23,6,1)],"s","Самцы глухаря и тетерева, вальдшнеп"],
- ["Север Таймыра (от 72° с.ш.): утки и гуси",[P(6,1,6,10)],"s","Зона «е»"],
- ["Селезни с подсадной уткой",[P(5,1,5,30)],"s","30 дней с первой субботы мая, только в закреплённых угодьях"]
-];
-const ZONES=[
- ["а","юг: Минусинск, Шушенское, Курагино, Ужур, Шарыпово и др.","последняя суббота апреля"],
- ["б","центр, Красноярск, юг Енисейского района до 60° с.ш.","первая суббота мая"],
- ["в","Кежма, Северо-Енисейский, север Енисейского района, юг Туруханского и Эвенкийского районов до 64° с.ш.","вторая суббота мая"],
- ["г","Туруханский район от 64° с.ш. до Полярного круга, север Эвенкии","третья суббота мая"],
- ["д","Норильск, юг Таймыра до 72° с.ш., север Туруханского района","четвёртая суббота мая"],
- ["е","север Таймыра от 72° с.ш.","1 июня"]
-];
+/* ---------- сроки по регионам ---------- */
+let REGIONS=null,REGIONS_P=null;
+const DISTRICTS=["ЦФО","СЗФО","ЮФО","СКФО","ПФО","УФО","СФО","ДФО"];
+const DISTRICT_N={ЦФО:"Центральный",СЗФО:"Северо-Западный",ЮФО:"Южный",СКФО:"Северо-Кавказский",ПФО:"Приволжский",УФО:"Уральский",СФО:"Сибирский",ДФО:"Дальневосточный"};
+function loadRegions(){if(REGIONS)return Promise.resolve(REGIONS);if(REGIONS_P)return REGIONS_P;
+ return REGIONS_P=fetch("regions.json").then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>REGIONS=j).catch(()=>{REGIONS_P=null;return null})}
+function pDate(s){const [d,m]=s.split(".").map(Number);return [m,d]}
+function regRows(R){return (R.rows||[]).map(r=>{if(r.g)return [r.g,null,"",r.note||""];const p=(r.p||[]).map(x=>{const [m1,d1]=pDate(x[0]),[m2,d2]=pDate(x[1]);const o=[m1,d1,m2,d2];return o});if(r.t&&p.length===1)p[0].txt=r.t;return [r.n,p,r.c||"u",r.note||""]})}
+function curRegion(){return (S.region&&REGIONS&&REGIONS[S.region])?S.region:"krasnoyarsk"}
+const CHECKED={primary:["ok","Сверено по тексту документа"],secondary:["warn","По справочным источникам — документ целиком не прочитан"],none:["bad","Региональные данные не найдены"]};
 function region(){
-  CUR="region";
-  app.innerHTML=top("Красноярский край",1)+`<p class="sub">Реальные сроки охоты в крае. Их устанавливает губернатор, и они отличаются от федеральных, которые спрашивают на экзамене. Для Норильска и Таймыра сроки по зверю общие для всего края, отличается только весенняя охота на птицу.</p>
-  ${openNowHTML(REG,"В крае открыто сегодня")}
-  <div class="sec-h"><h2>Календарь</h2></div>${calHTML(REG)}${CAL_LEGEND}
-  <div class="sec-h"><h2>Весенняя охота по зонам</h2><span class="label">10 дней</span></div>
-  <div class="card"><p style="margin:0 0 10px">Утки и гуси — с субботы, самцы глухаря и тетерева и вальдшнеп — со следующего воскресенья. Весной нельзя: белая и тундряная куропатки, рябчик, лысуха, самки уток, глухаря и тетерева.</p>
-  <div class="tbl"><table><thead><tr><th>Зона</th><th>Территория</th><th>Открытие</th></tr></thead><tbody>${ZONES.map(z=>`<tr class="${z[0]==="д"?"hl":""}"><td><b>${z[0]}</b></td><td>${esc(z[1])}</td><td class="num">${esc(z[2])}</td></tr>`).join("")}</tbody></table></div>
-  <p class="cap">На Таймыре весной закрыты для охоты на водоплавающую дичь поймы рек Большая Балахня и Новая (Хатанга), острова Кабацкий, Большой и Малый Леонтьевские (Дудинка).</p></div>
-  <div class="card docnote" style="margin-top:12px"><b>Откуда данные.</b> Указ Губернатора Красноярского края от 08.04.2013 № 62-уг в редакции от 31.07.2025 № 212-уг. Сроки сверены по двум справочным сайтам (oir.su, huntmap.ru), дата открытия осени 2026 — по сообщению краевого Минприроды. Даты весны 2027 рассчитаны по правилу «четвёртая суббота мая». Перед выездом сверь со Службой по охране животного мира края: <a href="http://www.ohotnadzor24.ru/" target="_blank" rel="noopener">ohotnadzor24.ru</a>.</div>`;
+ CUR="region";
+ app.innerHTML=top("Сроки в регионе",1)+`<p class="sub">Загружаю данные по регионам…</p>`;
+ loadRegions().then(R=>{if(CUR!=="region")return;
+  if(!R){app.innerHTML=top("Сроки в регионе",1)+`<div class="card"><p>Не удалось загрузить сроки по регионам. Проверь интернет и открой раздел ещё раз — после первой загрузки он работает и без сети.</p></div>`;return}
+  const slug=curRegion();const r=R[slug];const rows=regRows(r);const fed=r.same_as_federal||!rows.some(x=>x[1]);
+  const ck=CHECKED[r.checked]||CHECKED.none;
+  let h=top("Сроки в регионе",1)+`<button class="reg-pick" data-regpick aria-haspopup="dialog"><span><small>Регион</small><b>${esc(r.name)}</b></span><span class="reg-chg">Сменить</span></button>
+  <p class="sub" style="margin:10px 0 12px">Реальные сроки охоты устанавливает глава региона, и они отличаются от федеральных, которые спрашивают на экзамене.</p>`;
+  if(r.closed){h+=`<div class="card closed-note"><h3>Охота в регионе закрыта</h3><p style="margin:6px 0 0">${esc(r.notes||"")}</p></div>`}
+  else if(fed){h+=`<div class="card docnote"><b>${r.same_as_federal?"В регионе действуют федеральные сроки.":"Региональных сроков не нашли — ниже федеральные."}</b> ${esc(r.notes||"")}</div>`+openNowHTML(SEAS,"По федеральным срокам открыто сегодня")+`<div class="sec-h"><h2>Календарь</h2></div>${calHTML(SEAS)}${CAL_LEGEND}`}
+  else{h+=openNowHTML(rows,"Открыто сегодня")+`<div class="sec-h"><h2>Календарь</h2></div>${calHTML(rows)}${CAL_LEGEND}`}
+  if(r.spring)h+=`<div class="sec-h"><h2>Весенняя охота</h2></div><div class="card"><p style="margin:0">${esc(r.spring)}</p>${r.zones?`<div class="tbl" style="margin-top:10px"><table><thead><tr><th>Зона</th><th>Территория</th><th>Открытие</th></tr></thead><tbody>${r.zones.map(z=>`<tr class="${z.hl?"hl":""}"><td><b>${esc(z.z)}</b></td><td>${esc(z.area)}</td><td class="num">${esc(z.open)}</td></tr>`).join("")}</tbody></table></div>`:""}</div>`;
+  if(r.notes&&!fed&&!r.closed)h+=`<div class="card" style="margin-top:12px"><div class="label">Особенности</div><p style="margin:6px 0 0">${esc(r.notes)}</p></div>`;
+  h+=`<div class="card src" style="margin-top:12px"><span class="pill ${ck[0]}">${ck[1]}</span>
+   ${r.doc?`<p style="margin:8px 0 4px"><b>Документ:</b> ${esc(r.doc)}</p>`:""}
+   ${(r.sources||[]).length?`<p class="cap" style="margin:4px 0 0">Источники: ${r.sources.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener">${i+1}</a>`).join(", ")}</p>`:""}
+   <p class="cap">${r.contact?esc(r.contact)+". ":""}Перед выездом сверь даты с региональным охотуправлением: сроки могут меняться в течение года.</p></div>`;
+  app.innerHTML=h;
+ });
 }
+function regionPicker(){
+ closeModal();const R=REGIONS||{};const list=Object.keys(R).map(k=>[k,R[k]]).sort((a,b)=>a[1].name.localeCompare(b[1].name,"ru"));
+ const m=document.createElement("div");m.className="modal";m.id="modal";
+ m.innerHTML=`<div class="modal-card reg-modal" role="dialog" aria-modal="true" aria-label="Выбор региона"><div class="modal-h"><h2>Регион</h2><button class="iconbtn" data-close>Закрыть</button></div>
+ <input class="search" id="rq2" type="search" placeholder="Начни вводить: Ирк…, Якут…, Москва" autocomplete="off"><div class="reg-list" id="rlist"></div></div>`;
+ document.body.appendChild(m);document.body.classList.add("noscroll");
+ const draw=q=>{q=(q||"").toLowerCase().replace(/ё/g,"е").trim();const cur=curRegion();let h="";
+  DISTRICTS.forEach(d=>{const items=list.filter(([k,r])=>r.district===d&&(!q||r.name.toLowerCase().replace(/ё/g,"е").includes(q)));if(!items.length)return;
+   h+=`<div class="reg-d">${DISTRICT_N[d]||d}</div>`+items.map(([k,r])=>`<button class="reg-i ${k===cur?"on":""}" data-reg="${k}">${esc(r.name)}${r.closed?`<small>закрыта</small>`:r.checked==="none"?`<small>нет данных</small>`:""}</button>`).join("")});
+  const rest=list.filter(([k,r])=>!DISTRICTS.includes(r.district)&&(!q||r.name.toLowerCase().includes(q)));
+  h+=rest.map(([k,r])=>`<button class="reg-i" data-reg="${k}">${esc(r.name)}</button>`).join("");
+  document.getElementById("rlist").innerHTML=h||`<p class="sub">Ничего не нашлось.</p>`};
+ draw("");const inp=document.getElementById("rq2");inp.addEventListener("input",()=>draw(inp.value));if(matchMedia("(hover:hover)").matches)inp.focus();
+}
+document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;
+ if(t.hasAttribute("data-regpick")){loadRegions().then(()=>regionPicker());return}
+ if(t.dataset.reg){S.region=t.dataset.reg;S.regionName=REGIONS[t.dataset.reg].name;save();schedulePush();closeModal();region();scrollTo(0,0)}
+});
 
 function cheat(){
   app.innerHTML=top("Шпаргалка",1)+`
